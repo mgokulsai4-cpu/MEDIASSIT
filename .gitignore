@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+backend/dist/
+
+# Environment files (keep real secrets out of git)
+backend/.env
+ai-service/.env
+mobile/.env
+
+# Expo
+mobile/.expo/
+mobile/web-build/
+mobile/dist/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+
+# Logs
+*.log
+mongodb-data/

@@ -1,0 +1,200 @@
+{
+  "disclaimer": "This is AI-assisted guidance, not a medical diagnosis. Always consult a qualified healthcare professional.",
+  "category_question": "What problem are you having?",
+  "category_question_simple": "Tap the picture that is closest to your problem. If none fits, tap \"I don't know\".",
+  "not_sure_simple": "I don't know",
+  "category_fallback_question": "Can you tell us a little more? Which of these is closest to your problem?",
+  "category_fallback_question_simple": "Tap the picture that is closest to your problem. Or tap \"I don't know\".",
+  "category_fallback_option": {
+    "fever": "Fever",
+    "cough": "Cough or cold",
+    "stomach_pain": "Stomach pain",
+    "body_pain": "Body pain or injury",
+    "skin_problem": "Skin problem"
+  },
+  "category_label": {
+    "fever": "Fever",
+    "stomach": "Stomach problem",
+    "chest": "Chest or heart",
+    "breathing": "Breathing problem",
+    "head": "Head or dizziness",
+    "bone": "Bone / joint",
+    "skin": "Skin",
+    "ent": "Ear / nose / throat",
+    "women": "Women's health",
+    "child": "Child health"
+  },
+  "category_emoji": {
+    "fever": "fever",
+    "stomach": "stomach",
+    "chest": "heart",
+    "breathing": "lungs",
+    "head": "brain",
+    "bone": "bone",
+    "skin": "sun",
+    "ent": "ear",
+    "women": "female",
+    "child": "baby"
+  },
+  "option_text": {
+    "little": "A little",
+    "medium": "Medium",
+    "severe": "Very bad",
+    "today": "Today",
+    "days_2_3": "2-3 days ago",
+    "week_more": "More than a week",
+    "not_sure": "I am not sure",
+    "chills": "Chills or shivering",
+    "body_ache": "Body ache",
+    "breathing": "Trouble breathing",
+    "upper": "Upper stomach",
+    "lower": "Lower stomach",
+    "whole": "Whole stomach",
+    "sweating": "Sweating",
+    "arm_jaw": "Pain in arm or jaw",
+    "rest": "While resting",
+    "activity": "When walking or working",
+    "sleep": "While sleeping",
+    "fever_cough": "Yes, fever or cough",
+    "no_fever": "No",
+    "vision": "Blurred or double vision",
+    "weak": "Weakness or numbness on one side",
+    "vomit": "Vomiting",
+    "fall": "Yes, I fell or got hurt",
+    "no_injury": "No injury",
+    "rash": "Rash or redness",
+    "allergy": "Allergy or itching",
+    "wound": "Wound or cut",
+    "burn": "Burn",
+    "fever": "Yes, fever"
+  },
+  "option_emoji": {
+    "little": "smile",
+    "medium": "meh",
+    "severe": "frown",
+    "today": "clock",
+    "days_2_3": "clock",
+    "week_more": "hourglass",
+    "not_sure": "question",
+    "chills": "snowflake",
+    "body_ache": "tired",
+    "breathing": "lungs",
+    "upper": "arrow-up",
+    "lower": "arrow-down",
+    "whole": "circle",
+    "sweating": "sweat",
+    "arm_jaw": "hand",
+    "rest": "bed",
+    "activity": "walking",
+    "sleep": "moon",
+    "fever_cough": "fever",
+    "no_fever": "thumbs-up",
+    "vision": "eye",
+    "weak": "person",
+    "vomit": "poop",
+    "fall": "alert",
+    "no_injury": "thumbs-up",
+    "rash": "dots",
+    "allergy": "alert",
+    "wound": "bandage",
+    "burn": "fire",
+    "fever": "fever"
+  },
+  "urgency_label": {
+    "green": "Routine",
+    "yellow": "Soon",
+    "orange": "Urgent",
+    "red": "Emergency"
+  },
+  "severity_label": {
+    "mild": "Mild",
+    "moderate": "Moderate",
+    "severe": "Severe"
+  },
+  "reason": {
+    "routine": "Your symptoms can usually be handled with a routine appointment.",
+    "yellow": "You should seek medical evaluation relatively soon. Consider booking an appointment within the next day or two.",
+    "orange": "Your symptoms should be evaluated by a healthcare professional promptly.",
+    "red": "Your symptoms may require immediate medical attention. Please seek emergency medical care now."
+  },
+  "reason_simple": {
+    "green": "No hurry. You can see a doctor when it is convenient for you.",
+    "yellow": "See a doctor in the next day or two.",
+    "orange": "See a doctor today. Do not wait long.",
+    "red": "Go to a hospital right now. This is an emergency. Do not wait."
+  },
+  "fallback_reason": "Since we could not identify a specific problem, we recommend starting with a general physician who can guide you further.",
+  "fallback_reason_simple": "See a general doctor (family doctor). They will check you and tell you what to do.",
+  "questions": {
+    "fever": [
+      { "id": "Q_fever_severity", "prompt": "How bad do you feel with the fever?", "simple": "How bad is it? A little, medium or very bad?", "options": ["little", "medium", "severe"] },
+      { "id": "Q_fever_onset", "prompt": "When did the fever start?", "simple": "How long has the fever been there?", "options": ["today", "days_2_3", "week_more"] },
+      { "id": "Q_fever_assoc", "prompt": "Do you also have any of these?", "simple": "Pick anything else you feel?", "options": ["chills", "body_ache", "breathing"] }
+    ],
+    "stomach": [
+      { "id": "Q_stomach_loc", "prompt": "Where does it hurt?", "simple": "Where is the pain? Top, middle, bottom or whole stomach?", "options": ["upper", "lower", "whole"] },
+      { "id": "Q_stomach_onset", "prompt": "When did it start?", "simple": "How long has the pain been there?", "options": ["today", "days_2_3", "week_more"] },
+      { "id": "Q_stomach_sev", "prompt": "How bad is the pain?", "simple": "How bad is it? A little, medium or very bad?", "options": ["little", "medium", "severe"] }
+    ],
+    "chest": [
+      { "id": "Q_chest_sev", "prompt": "How bad is the chest pain?", "simple": "How bad is the pain? A little, medium or very bad?", "options": ["little", "medium", "severe"] },
+      { "id": "Q_chest_assoc", "prompt": "Do you also have any of these?", "simple": "Pick anything else you feel?", "options": ["sweating", "arm_jaw", "breathing"] },
+      { "id": "Q_chest_onset", "prompt": "When did the chest pain start?", "simple": "How long has the pain been there?", "options": ["today", "days_2_3", "week_more"] }
+    ],
+    "breathing": [
+      { "id": "Q_breath_when", "prompt": "When do you feel breathless?", "simple": "When do you find it hard to breathe?", "options": ["rest", "activity", "sleep"] },
+      { "id": "Q_breath_sev", "prompt": "How bad is it?", "simple": "How bad is it? A little, medium or very bad?", "options": ["little", "medium", "severe"] },
+      { "id": "Q_breath_fever", "prompt": "Do you have fever or cough too?", "simple": "Do you have fever or cough?", "options": ["fever_cough", "no_fever"] }
+    ],
+    "head": [
+      { "id": "Q_head_sev", "prompt": "How bad is the headache or dizziness?", "simple": "How bad is it? A little, medium or very bad?", "options": ["little", "medium", "severe"] },
+      { "id": "Q_head_assoc", "prompt": "Do you also have any of these?", "simple": "Pick anything else you feel?", "options": ["vision", "weak", "vomit"] },
+      { "id": "Q_head_onset", "prompt": "When did it start?", "simple": "How long has it been there?", "options": ["today", "days_2_3", "week_more"] }
+    ],
+    "bone": [
+      { "id": "Q_bone_sev", "prompt": "How much does it hurt?", "simple": "How bad is it? A little, medium or very bad?", "options": ["little", "medium", "severe"] },
+      { "id": "Q_bone_cause", "prompt": "Did you have a fall or injury?", "simple": "Did you fall or get hurt?", "options": ["fall", "no_injury"] },
+      { "id": "Q_bone_onset", "prompt": "When did the pain start?", "simple": "How long is it since the problem started?", "options": ["today", "days_2_3", "week_more"] }
+    ],
+  "skin": [
+      { "id": "Q_skin_sev", "prompt": "How bad is the skin problem?", "simple": "How bad is it? A little, medium or very bad?", "options": ["little", "medium", "severe"] },
+      { "id": "Q_skin_type", "prompt": "What does it look like?", "simple": "What do you see on the skin?", "options": ["rash", "allergy", "wound", "burn"] },
+      { "id": "Q_skin_onset", "prompt": "When did it first appear?", "simple": "How long has it been there?", "options": ["today", "days_2_3", "week_more"] }
+    ],
+    "ent": [
+      { "id": "Q_ent_sev", "prompt": "How bad is it?", "simple": "How bad is it? A little, medium or very bad?", "options": ["little", "medium", "severe"] },
+      { "id": "Q_ent_onset", "prompt": "When did it start?", "simple": "How long has it been there?", "options": ["today", "days_2_3", "week_more"] }
+    ],
+    "women": [
+      { "id": "Q_women_sev", "prompt": "How bad is the problem?", "simple": "How bad is it? A little, medium or very bad?", "options": ["little", "medium", "severe"] },
+      { "id": "Q_women_onset", "prompt": "When did it start?", "simple": "How long has it been there?", "options": ["today", "days_2_3", "week_more"] }
+    ],
+    "child": [
+      { "id": "Q_child_sev", "prompt": "How sick does the child feel?", "simple": "How bad is the child feeling?", "options": ["little", "medium", "severe"] },
+      { "id": "Q_child_fever", "prompt": "Does the child have fever?", "simple": "Does the child have fever?", "options": ["fever", "no_fever"] },
+      { "id": "Q_child_onset", "prompt": "Since when is the child unwell?", "simple": "How long has the child been unwell?", "options": ["today", "days_2_3", "week_more"] }
+    ]
+  },
+  "appointment": {
+    "confirmed": "Your appointment with {doctor} has been confirmed for {date} at {time}.",
+    "cancelled": "Your appointment {appointment_id} has been cancelled.",
+    "slots_intro": "Here are the available slots:",
+    "slots_with_doctor": "Available slots with {doctor} on {date}:",
+    "more_slots": "... and {count} more slot(s): {slots}",
+    "no_slots": "Sorry, there are no available slots on that day. Please choose another date."
+  },
+  "queue": {
+    "eta": "Your estimated wait is about {minutes} minutes.",
+    "position": "You are at position #{position} in the queue.",
+    "called": "The doctor is calling you now. Please get ready.",
+    "in_consultation": "You are currently in consultation.",
+    "completed": "Your consultation is complete. Thank you!",
+    "cancelled": "Your queue token has been cancelled.",
+    "waiting": "You are in the waiting queue.",
+    "unknown": "Your queue status is unknown."
+  },
+  "report": {
+    "llm_system": "You are a careful medical report summarizer. Summarize the report into plain language for the patient. Never invent information. Return JSON with keys: main_complaint, findings, diagnosis, treatment, follow_up.",
+    "summary_ready": "Your medical report summary is ready."
+  }
+}
