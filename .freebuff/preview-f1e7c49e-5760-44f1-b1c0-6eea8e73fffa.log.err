@@ -1,0 +1,11 @@
+The following packages should be updated for best compatibility with the installed expo version:
+  expo@54.0.36 - expected version: ~54.0.37
+  expo-constants@18.0.13 - expected version: ~18.0.14
+Your project may not work correctly until you install the expected versions of the packages.
+Assit-main\mobile\node_modules\@expo\cli\src\start\server\metro\runServer-fork.ts:135:16
+    at new Promise (<anonymous>)
+    at runServer (C:\CSP\MEDIASSIT\MediAssit-main\mobile\node_modules\@expo\cli\src\start\server\metro\runServer-fork.ts:126:10)
+    at instantiateMetroAsync (C:\CSP\MEDIASSIT\MediAssit-main\mobile\node_modules\@expo\cli\src\start\server\metro\instantiateMetro.ts:290:40)
+    at MetroBundlerDevServer.startImplementationAsync (C:\CSP\MEDIASSIT\MediAssit-main\mobile\node_modules\@expo\cli\src\start\server\metro\MetroBundlerDevServer.ts:1062:69)
+    at MetroBundlerDevServer.startAsync (C:\CSP\MEDIASSIT\MediAssit-main\mobile\node_modules\@expo\cli\src\start\server\BundlerDevServer.ts:171:18)
+    at DevServerManager.startAsync (C:\CSP\MEDIASSIT\MediAssit-main\mobile\node_modules\@expo\cli\src\start\server\DevServerManager.ts:184:7)

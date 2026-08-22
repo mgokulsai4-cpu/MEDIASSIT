@@ -161,6 +161,96 @@ const ASSOC_WORDS: Record<string, string[]> = {
   upper: ['upper', 'upper stomach'],
   lower: ['lower', 'lower stomach'],
   whole: ['whole', 'full stomach'],
+  // Pain quality
+  sharp: ['sharp', 'stabbing', 'piercing'],
+  dull: ['dull', 'aching', 'heavy'],
+  throbbing: ['throbbing', 'pounding', 'beating'],
+  burning: ['burning', 'burns', 'scalding'],
+  pressure: ['pressure', 'tightness', 'tight', 'squeezing'],
+  crushing: ['crushing', 'crushing pain'],
+  crampy: ['cramp', 'cramping', 'cramps', 'spasms'],
+  // Aggravating factors
+  eating: ['after eating', 'after food', 'when i eat', 'after meals'],
+  movement: ['with movement', 'when moving', 'when i move', 'on movement'],
+  pressing: ['when pressed', 'when i press', 'on pressing', 'touching'],
+  breathing_makes_worse: ['worse with breathing', 'hurts to breathe', 'pain when breathing'],
+  exertion: ['with activity', 'when walking', 'on exertion', 'physical activity'],
+  lying_down: ['lying down', 'when lying', 'on lying'],
+  light: ['bright light', 'light hurts', 'light makes it worse', 'photophobia'],
+  sound: ['loud sound', 'noise hurts', 'sound makes it worse'],
+  // Pattern
+  constant: ['constant', 'all the time', 'always', 'non-stop'],
+  intermittent: ['comes and goes', 'on and off', 'intermittent', 'comes go'],
+  // Sweating
+  yes_sweating: ['sweating a lot', 'sweating profusely', 'drenched'],
+  night_sweats: ['night sweat', 'night sweats', 'sweating at night'],
+  // Exposure
+  travel: ['traveled', 'travel', 'trip', 'journey'],
+  sick_contact: ['sick people', 'someone sick', 'exposed to'],
+  // Bowel
+  diarrhea: ['diarrhea', 'diarrhoea', 'loose stool', 'loose motion', 'dast'],
+  constipation: ['constipation', 'constipated', 'hard stool'],
+  blood: ['blood in stool', 'blood in vomit', 'bloody stool', 'blood stool'],
+  // Nausea
+  nausea: ['nausea', 'nauseous', 'feel like throwing', 'want to vomit'],
+  vomiting_v: ['vomited', 'vomiting', 'threw up', 'puked'],
+  // Cough
+  dry: ['dry cough', 'dry coughing'],
+  wet: ['wet cough', 'mucus', 'phlegm', 'productive cough'],
+  // Wheezing
+  yes_wheeze: ['wheeze', 'wheezing', 'whistling'],
+  // Swelling
+  yes_swelling: ['swollen face', 'swollen lip', 'swollen tongue', 'swelling face'],
+  // Head location
+  front: ['front of head', 'forehead', 'front head'],
+  back: ['back of head', 'back head', 'occipital'],
+  one_side: ['one side', 'half head', 'left side', 'right side'],
+  all_over: ['all over', 'everywhere', 'whole head'],
+  // Head triggers
+  // Stiff neck
+  stiff_neck: ['stiff neck', 'neck stiffness', 'neck pain'],
+  // Bone location
+  knee: ['knee', 'knee pain'],
+  back_bone: ['back pain', 'lower back', 'upper back'],
+  shoulder: ['shoulder', 'shoulder pain'],
+  wrist: ['wrist', 'hand pain', 'wrist pain'],
+  hip: ['hip', 'hip pain'],
+  // Movement
+  yes_move: ['move normally', 'moves fine', 'can move'],
+  limited: ['limited movement', 'cant move fully', 'stiff'],
+  cannot_move: ['cant move', 'cannot move', 'unable to move'],
+  // Swelling
+  swelling_bone: ['swollen', 'swelling', 'puffy'],
+  bruising: ['bruise', 'bruising', 'bruised', 'black and blue'],
+  deformity: ['deformity', 'misaligned', 'crooked', 'out of place'],
+  // Skin
+  spreading: ['spreading', 'getting bigger', 'growing', 'expanding'],
+  stable: ['staying the same', 'same size', 'hasnt changed'],
+  shrinking: ['getting smaller', 'shrinking', 'fading'],
+  itchy_skin: ['itchy', 'itching', 'itch', 'khich khich'],
+  painful_skin: ['painful', 'hurts', 'sore'],
+  yes_discharge: ['discharge', 'oozing', 'leaking', 'pus'],
+  // ENT
+  ear: ['ear pain', 'ear ache', 'earache'],
+  nose: ['nose', 'nasal', 'runny nose', 'blocked nose'],
+  throat_ent: ['sore throat', 'throat pain', 'throat sore'],
+  multiple_ent: ['both ears', 'ear and throat', 'multiple areas'],
+  hearing_loss: ['hearing loss', 'cant hear', 'ringing', 'tinnitus'],
+  difficulty_swallowing: ['difficulty swallowing', 'hard to swallow', 'trouble swallowing', 'painful swallowing'],
+  // Women
+  before_period: ['before period', 'premenstrual', 'pms'],
+  during_period: ['during period', 'on period', 'menstruating'],
+  after_period: ['after period', 'post menstrual'],
+  not_related: ['not related', 'not period'],
+  yes_urination: ['pain when urinating', 'burning urination', 'painful urination', 'dysuria'],
+  // Child
+  yes_eating: ['eating normally', 'eating fine', 'drinking normally'],
+  reduced: ['eating less', 'not eating much', 'drinking less'],
+  refusing: ['refusing food', 'not eating', 'not drinking', 'refusing water'],
+  irritable: ['irritable', 'crying', 'fussy', 'cranky'],
+  unusually_sleepy: ['sleepy', 'lethargic', 'drowsy', 'not active'],
+  playful: ['playful', 'active', 'normal behavior'],
+  yes_rash: ['rash', 'rashes'],
 };
 
 const SEV_KEY_BY_CAT: Record<Category, string> = {
@@ -202,6 +292,61 @@ const ASSOC_KEYS_BY_CAT: Partial<Record<Category, Record<string, string[]>>> = {
   child: { Q_child_fever: ['no_fever', 'fever'] },
 };
 
+// Keys for new questions that can be extracted from free text
+const EXTRACT_KEYS_BY_CAT: Partial<Record<Category, Record<string, string[]>>> = {
+  fever: {
+    Q_fever_pattern: ['constant', 'intermittent'],
+    Q_fever_sweating: ['yes_sweating', 'night_sweats'],
+    Q_fever_exposure: ['travel', 'sick_contact'],
+  },
+  stomach: {
+    Q_stomach_quality: ['sharp', 'crampy', 'burning', 'dull'],
+    Q_stomach_aggravating: ['eating', 'movement', 'pressing'],
+    Q_stomach_bowel: ['diarrhea', 'constipation', 'blood'],
+    Q_stomach_nausea: ['nausea', 'vomiting_v'],
+  },
+  chest: {
+    Q_chest_quality: ['sharp', 'pressure', 'burning', 'crushing'],
+    Q_chest_aggravating: ['breathing_makes_worse', 'movement', 'exertion', 'lying_down'],
+  },
+  breathing: {
+    Q_breath_cough: ['dry', 'wet'],
+    Q_breath_wheeze: ['yes_wheeze'],
+    Q_breath_swelling: ['yes_swelling'],
+  },
+  head: {
+    Q_head_location: ['front', 'back', 'one_side', 'all_over'],
+    Q_head_quality: ['throbbing', 'pressure', 'sharp', 'dull'],
+    Q_head_triggers: ['light', 'sound', 'movement'],
+    Q_head_neck: ['stiff_neck'],
+  },
+  bone: {
+    Q_bone_location: ['knee', 'back_bone', 'shoulder', 'wrist', 'hip'],
+    Q_bone_movement: ['yes_move', 'limited', 'cannot_move'],
+    Q_bone_swelling: ['swelling_bone', 'bruising', 'deformity'],
+  },
+  skin: {
+    Q_skin_spreading: ['spreading', 'stable', 'shrinking'],
+    Q_skin_sensation: ['itchy_skin', 'painful_skin'],
+    Q_skin_discharge: ['yes_discharge'],
+  },
+  ent: {
+    Q_ent_location: ['ear', 'nose', 'throat_ent', 'multiple_ent'],
+    Q_ent_hearing: ['hearing_loss', 'difficulty_swallowing'],
+    Q_ent_discharge: ['yes_discharge'],
+  },
+  women: {
+    Q_women_cycle: ['before_period', 'during_period', 'after_period', 'not_related'],
+    Q_women_discharge: ['yes_discharge'],
+    Q_women_urination: ['yes_urination'],
+  },
+  child: {
+    Q_child_eating: ['yes_eating', 'reduced', 'refusing'],
+    Q_child_behavior: ['irritable', 'unusually_sleepy', 'playful'],
+    Q_child_rash: ['yes_rash'],
+  },
+};
+
 function extractAnswers(texts: string[], cats: Category[]): AnswerInput[] {
   if (texts.length === 0) return [];
   const t = wordList(texts);
@@ -234,6 +379,14 @@ function extractAnswers(texts: string[], cats: Category[]): AnswerInput[] {
   for (const cat of cats) {
     const assocMap = ASSOC_KEYS_BY_CAT[cat] ?? {};
     for (const [qkey, ids] of Object.entries(assocMap)) {
+      for (const id of ids) {
+        const words = ASSOC_WORDS[id];
+        if (words && anyWord(t, words)) push(qkey, id);
+      }
+    }
+    // Also extract from new question categories
+    const extractMap = EXTRACT_KEYS_BY_CAT[cat] ?? {};
+    for (const [qkey, ids] of Object.entries(extractMap)) {
       for (const id of ids) {
         const words = ASSOC_WORDS[id];
         if (words && anyWord(t, words)) push(qkey, id);
@@ -481,6 +634,13 @@ export function nextChatTurn(input: TriageChatInput): ChatTurn {
     return { type: 'result', triage: buildResult(cats, allAnswers, texts, input.patient, simple) };
   }
 
+  // Adaptive depth: for mild cases, skip optional questions after core questions are answered
+  const isMild = sevRaw === 'little';
+  const coreQuestionsAnswered = [
+    sevRaw ? 'sev' : null,
+    answerOnset(allAnswers).label !== 'Duration not clear yet' ? 'onset' : null,
+  ].filter(Boolean).length >= 2;
+
   function answeredValuesFor(answers: AnswerInput[], key: string): Set<string> {
   const out = new Set<string>();
   for (const a of answers) {
@@ -495,7 +655,21 @@ export function nextChatTurn(input: TriageChatInput): ChatTurn {
    symptom, still ask and just hide the option they already picked. */
 const MULTI_ASSOC_KEYS = new Set(['Q_fever_assoc', 'Q_chest_assoc', 'Q_head_assoc']);
 
-let index = 0;
+// Questions that are less critical for mild cases — can be skipped for adaptive depth
+const OPTIONAL_QUESTIONS = new Set([
+  'Q_fever_pattern', 'Q_fever_sweating', 'Q_fever_exposure',
+  'Q_stomach_quality', 'Q_stomach_aggravating', 'Q_stomach_bowel', 'Q_stomach_nausea',
+  'Q_chest_quality', 'Q_chest_aggravating', 'Q_chest_history',
+  'Q_breath_cough', 'Q_breath_wheeze', 'Q_breath_swelling',
+  'Q_head_location', 'Q_head_quality', 'Q_head_triggers', 'Q_head_neck',
+  'Q_bone_location', 'Q_bone_movement', 'Q_bone_swelling',
+  'Q_skin_spreading', 'Q_skin_sensation', 'Q_skin_discharge',
+  'Q_ent_location', 'Q_ent_hearing', 'Q_ent_discharge',
+  'Q_women_cycle', 'Q_women_discharge', 'Q_women_urination',
+  'Q_child_eating', 'Q_child_behavior', 'Q_child_rash',
+]);
+
+  let index = 0;
   let found: ChatTurn | null = null;
   while (found === null) {
     let progressed = false;
@@ -504,6 +678,12 @@ let index = 0;
       if (index < list.length) {
         progressed = true;
         const q = list[index];
+
+        // Adaptive depth: skip optional questions for mild cases after core questions are answered
+        if (isMild && coreQuestionsAnswered && OPTIONAL_QUESTIONS.has(q.id)) {
+          continue;
+        }
+
         const prev = findAnswer(allAnswers, q.id);
         const answeredValues = answeredValuesFor(allAnswers, q.id);
         if (prev && prev.answer === 'not_sure' && !prev.rephrased) {

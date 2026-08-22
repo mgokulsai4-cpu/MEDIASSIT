@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -8,6 +8,9 @@ import type { ScannedReport } from '../../src/types';
 import { Button } from '../../src/ui/Button';
 import { Card } from '../../src/ui/Card';
 import { Screen } from '../../src/ui/Screen';
+import { SpeakButton } from '../../src/ui/SpeakButton';
+import { useSettings } from '../../src/contexts/SettingsContext';
+import { speak } from '../../src/services/voice';
 import { colors, layout, radii, spacing, typography } from '../../src/ui/theme';
 
 export default function ScanReportScreen() {
@@ -15,7 +18,14 @@ export default function ScanReportScreen() {
   const [image, setImage] = useState<{ uri: string; base64: string } | null>(null);
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<ScannedReport | null>(null);
+  const { readAloud } = useSettings();
   const [history, setHistory] = useState<ScannedReport[]>([]);
+
+  useEffect(() => {
+    if (result && readAloud && result.ai_summary) {
+      speak('Scan result. ' + result.ai_summary);
+    }
+  }, [result, readAloud]);
 
   const loadHistory = useCallback(async () => {
     try {
@@ -86,7 +96,10 @@ export default function ScanReportScreen() {
 
         {result && (
           <Card style={[styles.card, styles.resultCard]}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
             <Text style={styles.sectionTitle}>AI Summary</Text>
+            {result.ai_summary ? <SpeakButton text={result.ai_summary} /> : null}
+          </View>
             {result.ai_summary ? (
               <Text style={styles.summaryText}>{result.ai_summary}</Text>
             ) : (

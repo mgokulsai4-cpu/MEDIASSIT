@@ -6,11 +6,15 @@ import { api } from '../../src/api/client';
 import type { Prescription } from '../../src/types';
 import { Card } from '../../src/ui/Card';
 import { Screen } from '../../src/ui/Screen';
+import { SpeakButton } from '../../src/ui/SpeakButton';
+import { useSettings } from '../../src/contexts/SettingsContext';
+import { speak } from '../../src/services/voice';
 import { colors, layout, radii, spacing, typography } from '../../src/ui/theme';
 
 export default function PrescriptionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [item, setItem] = useState<Prescription | null>(null);
+  const { readAloud } = useSettings();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,13 +25,30 @@ export default function PrescriptionDetailScreen() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    if (item && readAloud) {
+      const medList = item.medications.map(m => m.name + (m.dosage ? ' ' + m.dosage : '') + (m.frequency ? ', ' + m.frequency : '')).join('. ');
+      const parts = [
+        'Prescription' + (item.doctor ? ' from ' + item.doctor.name : ''),
+        medList ? 'Medications: ' + medList : '',
+        item.instructions ? 'Instructions: ' + item.instructions : '',
+        item.follow_up_date ? 'Follow-up date: ' + item.follow_up_date : '',
+        item.follow_up_notes ? item.follow_up_notes : '',
+      ].filter(Boolean).join('. ');
+      speak(parts);
+    }
+  }, [item, readAloud]);
+
   if (loading) return <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 60 }} />;
   if (!item) return <Screen><Text style={styles.error}>Prescription not found.</Text></Screen>;
 
   return (
     <Screen padded={false}>
       <ScrollView contentContainerStyle={styles.content}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <Text style={styles.title}>Prescription {item.prescription_id}</Text>
+        <SpeakButton text={item.doctor?.name ? 'Prescription from ' + item.doctor.name + '. ' : 'Prescription. ' + 'Medications: ' + item.medications.map(m => m.name).join(', ') + '.'} />
+      </View>
         {item.doctor && <Text style={styles.doctor}>{item.doctor.name} · {item.doctor.specialization}</Text>}
 
         <Card style={styles.card}>

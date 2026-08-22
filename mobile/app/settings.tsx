@@ -8,13 +8,16 @@ import { FadeSlide } from '../src/ui/motion';
 import { PasswordField } from '../src/ui/PasswordField';
 import { Screen } from '../src/ui/Screen';
 import { ThemePicker } from '../src/ui/ThemePicker';
+import { speechRecognitionAvailable } from '../src/services/voice';
 import { spacing, typography } from '../src/ui/theme';
 
 export default function SettingsScreen() {
-  const { theme, testMode, setTestMode } = useSettings();
+  const { theme, testMode, setTestMode, readAloud, setReadAloud } = useSettings();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
+
+  const voiceAvailable = speechRecognitionAvailable();
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword) {
@@ -46,6 +49,35 @@ export default function SettingsScreen() {
         <Text style={[styles.sectionTitle, { color: theme.ink }]}>Theme</Text>
         <View style={styles.themeWrap}>
           <ThemePicker />
+        </View>
+        </FadeSlide>
+
+        <FadeSlide delay={120}>
+        <Text style={[styles.sectionTitle, { color: theme.ink }]}>Accessibility</Text>
+        <View style={[styles.testCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={styles.testCopy}>
+            <Text style={[styles.optionLabel, { color: theme.ink }]}>Read aloud</Text>
+            <Text style={[styles.optionDescription, { color: theme.inkMuted }]}>The app reads bot messages, summaries, and guidance aloud automatically. Useful for users who cannot read.</Text>
+          </View>
+          <Switch
+            value={readAloud}
+            onValueChange={(value) => { void setReadAloud(value); }}
+            trackColor={{ false: theme.borderStrong, true: theme.primarySoft }}
+            thumbColor={readAloud ? theme.primary : theme.inkSubtle}
+          />
+        </View>
+        {readAloud && (
+          <Text style={[styles.testEnabled, { color: theme.success }]}>Read aloud enabled. Bot messages will be spoken.</Text>
+        )}
+
+        <View style={[styles.testCard, { backgroundColor: theme.surface, borderColor: theme.border, marginTop: spacing.md }]}>
+          <View style={styles.testCopy}>
+            <Text style={[styles.optionLabel, { color: theme.ink }]}>Voice input</Text>
+            <Text style={[styles.optionDescription, { color: theme.inkMuted }]}>Speak your symptoms instead of typing. Available on the symptom check screen.</Text>
+          </View>
+          <Text style={[styles.statusBadge, { color: voiceAvailable ? theme.success : theme.inkSubtle }]}>
+            {voiceAvailable ? 'Available' : 'Not available'}
+          </Text>
         </View>
         </FadeSlide>
 
@@ -114,4 +146,5 @@ const styles = StyleSheet.create({
   optionDescription: { ...typography.caption, marginTop: spacing.xs },
   warning: { ...typography.caption, marginTop: spacing.sm, fontWeight: '600' },
   testEnabled: { ...typography.caption, marginTop: spacing.md },
+  statusBadge: { ...typography.label, fontWeight: '700' },
 });

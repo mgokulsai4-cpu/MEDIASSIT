@@ -7,6 +7,7 @@ import { isThemeName, themes, type ThemeColors, type ThemeName } from '../ui/the
 
 const THEME_KEY = 'medassist_theme';
 const TEST_MODE_KEY = 'medassist_test_mode';
+const READ_ALOUD_KEY = 'medassist_read_aloud';
 
 type FakeQueueEntry = (typeof fakeDoctorQueue)[number];
 type FakeReport = (typeof fakeDoctorReports)[number];
@@ -19,7 +20,7 @@ function createFakeQueue(): FakeQueueEntry[] {
 }
 
 function createFakeReports(): FakeReport[] {
-  return fakeDoctorReports.map((report) => ({ ...report }));
+  return fakeDoctorReports.map((entry) => ({ ...entry }));
 }
 
 interface SettingsState {
@@ -35,6 +36,8 @@ interface SettingsState {
   updateFakeQueueStatus: (queueId: string, status: string) => void;
   fakeReports: FakeReport[];
   addFakeReport: (report: FakeReport) => void;
+  readAloud: boolean;
+  setReadAloud: (enabled: boolean) => Promise<void>;
 }
 
 const SettingsContext = createContext<SettingsState>({
@@ -50,24 +53,29 @@ const SettingsContext = createContext<SettingsState>({
   updateFakeQueueStatus: () => {},
   fakeReports: [],
   addFakeReport: () => {},
+  readAloud: false,
+  setReadAloud: async () => {},
 });
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [themeName, setThemeNameState] = useState<ThemeName>('ocean');
   const [testMode, setTestModeState] = useState(true);
+  const [readAloud, setReadAloudState] = useState(false);
   const [fakeAppointments, setFakeAppointments] = useState<Appointment[]>([]);
   const [fakeQueue, setFakeQueue] = useState<FakeQueueEntry[]>(createFakeQueue);
   const [fakeReports, setFakeReports] = useState<FakeReport[]>(createFakeReports);
 
   useEffect(() => {
     async function loadSettings() {
-      const [storedTheme, storedTestMode] = await Promise.all([
+      const [storedTheme, storedTestMode, storedReadAloud] = await Promise.all([
         AsyncStorage.getItem(THEME_KEY),
         AsyncStorage.getItem(TEST_MODE_KEY),
+        AsyncStorage.getItem(READ_ALOUD_KEY),
       ]);
       if (isThemeName(storedTheme)) setThemeNameState(storedTheme);
       setTestModeState(storedTestMode === null ? true : storedTestMode === 'true');
+      setReadAloudState(storedReadAloud === 'true');
     }
     void loadSettings();
   }, []);
@@ -93,6 +101,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     } else {
       setFakeAppointments([]);
     }
+  };
+
+  const setReadAloud = async (enabled: boolean) => {
+    setReadAloudState(enabled);
+    await AsyncStorage.setItem(READ_ALOUD_KEY, String(enabled));
   };
 
   const addFakeAppointment = (appointment: Appointment) => {
@@ -125,6 +138,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       updateFakeQueueStatus,
       fakeReports,
       addFakeReport,
+      readAloud,
+      setReadAloud,
     }}>
       {children}
     </SettingsContext.Provider>

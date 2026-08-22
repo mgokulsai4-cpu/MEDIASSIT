@@ -9,11 +9,13 @@ import { Button } from '../../src/ui/Button';
 import { Card } from '../../src/ui/Card';
 import { FadeSlide, Pulse, ScaleIn } from '../../src/ui/motion';
 import { Screen } from '../../src/ui/Screen';
+import { SpeakButton } from '../../src/ui/SpeakButton';
+import { speak } from '../../src/services/voice';
 import { useSettings } from '../../src/contexts/SettingsContext';
 import { radii, spacing, typography } from '../../src/ui/theme';
 
 export default function QueueScreen() {
-  const { theme } = useSettings();
+  const { theme, readAloud } = useSettings();
   const { id } = useLocalSearchParams<{ id: string }>();
   const isFake = id.startsWith('FAKE-');
   const [entry, setEntry] = useState<QueueEntry | null>(null);
@@ -90,6 +92,19 @@ export default function QueueScreen() {
     : entry.status === 'in_consultation' ? 'In Consultation'
     : entry.status === 'completed' ? 'Completed'
     : 'Cancelled';
+  // Auto-read queue status for accessibility
+  const queueSpeakText = entry ? (
+    'Queue position ' + (entry.position ?? 'unknown') + '. Status: ' + statusText + '.' +
+    (entry.estimated_wait_minutes ? ' Estimated wait ' + entry.estimated_wait_minutes + ' minutes.' : '') +
+    (entry.priority_guidance?.action ? ' Priority: ' + entry.priority_guidance.label + '. ' + entry.priority_guidance.action : '')
+  ) : '';
+
+  useEffect(() => {
+    if (entry && readAloud && queueSpeakText) {
+      speak(queueSpeakText);
+    }
+  }, [entry?.status, entry?.position, readAloud]);
+
   const ringColor =
     entry.status === 'called' ? theme.success
     : entry.status === 'in_consultation' ? theme.warning
@@ -108,7 +123,10 @@ export default function QueueScreen() {
             </Text>
           </View>
         </Pulse>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <Text style={[styles.status, { color: theme.ink }]}>{statusText}</Text>
+        <SpeakButton text={queueSpeakText} />
+      </View>
         <Text style={[styles.token, { color: theme.primary }]}>Token {entry.queue_token || entry.queue_id}</Text>
         {isActive && (
           <View style={[styles.waitPill, { backgroundColor: theme.primarySoft }]}>

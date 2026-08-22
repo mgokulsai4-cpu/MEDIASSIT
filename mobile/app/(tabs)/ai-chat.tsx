@@ -10,6 +10,7 @@ import { useSettings } from '../../src/contexts/SettingsContext';
 import { Button } from '../../src/ui/Button';
 import { BubbleIn, FadeSlide, ScaleIn, TypingDots } from '../../src/ui/motion';
 import { Screen } from '../../src/ui/Screen';
+import { SpeakButton } from '../../src/ui/SpeakButton';
 import { StatusBadge } from '../../src/ui/StatusBadge';
 import { fonts, layout, radii, spacing, typography } from '../../src/ui/theme';
 import {
@@ -44,7 +45,7 @@ function uid(prefix: string): string {
 
 export default function AIChatScreen() {
   const router = useRouter();
-  const { theme } = useSettings();
+  const { theme, readAloud } = useSettings();
   const [simple, setSimple] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -70,23 +71,27 @@ export default function AIChatScreen() {
 
   const handleTurn = useCallback((turn: ChatTurn) => {
     if (turn.type === 'question') {
-      addMessage({
+      const msg: Message = {
         id: uid('q'),
         type: 'question',
         content: turn.question.text,
         rephrased: turn.question.rephrased,
         options: turn.question.options,
-      });
+      };
+      addMessage(msg);
+      if (readAloud) speak(turn.question.text);
     } else {
       const triage = turn.triage;
-      addMessage({
+      const msg: Message = {
         id: uid('result'),
         type: 'result',
         content: triage.reason,
         triage,
-      });
+      };
+      addMessage(msg);
+      if (readAloud) speak(triage.reason);
     }
-  }, [addMessage]);
+  }, [addMessage, readAloud]);
 
   const handleSend = useCallback(async (text?: string) => {
     const msg = (text || input).trim();
@@ -157,12 +162,6 @@ export default function AIChatScreen() {
     );
   }, [listening, handleSend]);
 
-  const handleSpeakBot = useCallback((text?: string) => {
-    if (!text) return;
-    if (speechRecognitionAvailable()) stopListening();
-    speak(text);
-  }, []);
-
   const renderMessage = useCallback(({ item }: { item: Message }) => {
     if (item.type === 'user' || item.type === 'answer') {
       return (
@@ -188,11 +187,15 @@ export default function AIChatScreen() {
       const triage = item.triage;
       const urgency = triage.urgency.level;
       const tone = urgency === 'red' ? 'danger' : urgency === 'green' ? 'success' : 'warning';
+      const speakText = `${triage.urgency.label}. ${triage.reason}${triage.recommended_specialties.length > 0 ? `. Suggested specialty: ${triage.recommended_specialties.map((s) => s.specialty).join(', ')}` : ''}`;
       return (
         <BubbleIn side="bot" style={[styles.resultCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.resultTop}>
             <Text style={[styles.resultKicker, { color: theme.inkMuted }]}>Care guidance</Text>
-            <StatusBadge label={triage.urgency.label} tone={tone} />
+            <View style={styles.resultTopRight}>
+              <StatusBadge label={triage.urgency.label} tone={tone} />
+              <SpeakButton text={speakText} />
+            </View>
           </View>
           <Text style={[styles.resultReason, { color: theme.ink }]}>{triage.reason}</Text>
           {triage.recommended_specialties.length > 0 ? (
@@ -219,14 +222,7 @@ export default function AIChatScreen() {
         <View style={[styles.botBubble, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           <View style={styles.botTextRow}>
             <Text style={[styles.bubbleText, { color: theme.ink, flex: 1 }]}>{item.content}</Text>
-            <Pressable
-              onPress={() => handleSpeakBot(item.content)}
-              accessibilityRole="button"
-              accessibilityLabel="Read aloud"
-              style={({ pressed }) => [styles.speakBtn, { backgroundColor: theme.primarySoft }, pressed && styles.pressed]}
-            >
-              <Ionicons name="volume-medium" size={14} color={theme.primaryDark} />
-            </Pressable>
+            <SpeakButton text={item.content} />
           </View>
           {item.options && item.options.length > 0 ? (
             <View style={styles.options}>
@@ -251,7 +247,7 @@ export default function AIChatScreen() {
         </View>
       </BubbleIn>
     );
-  }, [handleOptionSelect, handleSpeakBot, loading, router, simple, theme]);
+  }, [handleOptionSelect, loading, router, simple, theme]);
 
   return (
     <Screen padded={false}>
@@ -411,7 +407,6 @@ const styles = StyleSheet.create({
   avatar: { width: 28, height: 28, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginBottom: 2 },
   botBubble: { flexShrink: 1, borderRadius: 18, borderTopLeftRadius: 6, padding: spacing.lg, borderWidth: 1 },
   botTextRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
-  speakBtn: { width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   userBubble: { maxWidth: '82%', borderRadius: 18, borderTopRightRadius: 6, paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
   assistCard: { borderRadius: 16, padding: spacing.lg, borderWidth: 1, marginBottom: spacing.md },
   bubbleText: { ...typography.body },
@@ -420,6 +415,7 @@ const styles = StyleSheet.create({
   optionText: { ...typography.label },
   resultCard: { borderRadius: 20, padding: spacing.xl, borderWidth: 1, marginBottom: spacing.md },
   resultTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
+  resultTopRight: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   resultKicker: { ...typography.caption, textTransform: 'uppercase', letterSpacing: 0.5 },
   resultReason: { ...typography.body, fontFamily: fonts.sansMedium },
   resultMeta: { ...typography.caption, marginTop: spacing.sm },

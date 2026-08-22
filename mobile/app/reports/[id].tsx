@@ -5,11 +5,15 @@ import { api } from '../../src/api/client';
 import type { MedicalReport } from '../../src/types';
 import { Card } from '../../src/ui/Card';
 import { Screen } from '../../src/ui/Screen';
+import { SpeakButton } from '../../src/ui/SpeakButton';
+import { useSettings } from '../../src/contexts/SettingsContext';
+import { speak } from '../../src/services/voice';
 import { colors, layout, spacing, typography } from '../../src/ui/theme';
 
 export default function ReportDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [report, setReport] = useState<MedicalReport | null>(null);
+  const { readAloud } = useSettings();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,13 +30,37 @@ export default function ReportDetailScreen() {
     if (id) loadReport();
   }, [id]);
 
+  useEffect(() => {
+    if (report && readAloud) {
+      const fields = [
+        report.symptoms ? 'Symptoms: ' + (Array.isArray(report.symptoms) ? report.symptoms.join(', ') : report.symptoms) : '',
+        report.clinical_observations ? 'Observations: ' + report.clinical_observations : '',
+        report.doctor_diagnosis ? 'Diagnosis: ' + report.doctor_diagnosis : '',
+        report.treatment ? 'Treatment: ' + report.treatment : '',
+        report.prescription ? 'Prescription: ' + report.prescription : '',
+        report.follow_up ? 'Follow-up: ' + report.follow_up : '',
+      ].filter(Boolean).join('. ');
+      if (fields) speak('Medical report. ' + fields);
+    }
+  }, [report, readAloud]);
+
   if (loading) return <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 60 }} />;
   if (!report) return <Screen><Text style={styles.error}>Report not found.</Text></Screen>;
 
   return (
     <Screen padded={false}>
     <ScrollView contentContainerStyle={styles.container}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
       <Text style={styles.title}>Medical Report</Text>
+      <SpeakButton text={"Medical report. " + [
+        report.symptoms ? "Symptoms: " + (Array.isArray(report.symptoms) ? report.symptoms.join(", ") : report.symptoms) : "",
+        report.clinical_observations ? "Observations: " + report.clinical_observations : "",
+        report.doctor_diagnosis ? "Diagnosis: " + report.doctor_diagnosis : "",
+        report.treatment ? "Treatment: " + report.treatment : "",
+        report.prescription ? "Prescription: " + report.prescription : "",
+        report.follow_up ? "Follow-up: " + report.follow_up : "",
+      ].filter(Boolean).join(". ")} />
+    </View>
       <Text style={styles.date}>{new Date(report.created_at ?? report.date ?? new Date().toISOString()).toLocaleDateString('en-US', { dateStyle: 'long' })}</Text>
 
       <Field label="Symptoms" value={Array.isArray(report.symptoms) ? report.symptoms.join(', ') : report.symptoms} />

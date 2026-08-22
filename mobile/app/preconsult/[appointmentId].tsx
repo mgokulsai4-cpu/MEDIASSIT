@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { api } from '../../src/api/client';
 import { Button } from '../../src/ui/Button';
@@ -8,6 +9,8 @@ import { BubbleIn, FadeSlide } from '../../src/ui/motion';
 import { Screen } from '../../src/ui/Screen';
 import { StatusBadge } from '../../src/ui/StatusBadge';
 import { useSettings } from '../../src/contexts/SettingsContext';
+import { SpeakButton } from '../../src/ui/SpeakButton';
+import { speechRecognitionAvailable, requestMicPermission, startListening, stopListening, speak } from '../../src/services/voice';
 import { layout, radii, spacing, typography } from '../../src/ui/theme';
 
 interface QuestionOption {
@@ -74,7 +77,7 @@ function unwrap<T>(res: { data?: T } | T): T {
 
 export default function PreConsultScreen() {
   const { appointmentId } = useLocalSearchParams<{ appointmentId: string }>();
-  const { theme } = useSettings();
+  const { theme, readAloud } = useSettings();
   const isFake = appointmentId.startsWith('FAKE-');
   const router = useRouter();
   const [pcId, setPcId] = useState<string | null>(null);
@@ -86,6 +89,8 @@ export default function PreConsultScreen() {
   const [waitingForFreeText, setWaitingForFreeText] = useState(false);
   const [waitingKey, setWaitingKey] = useState('');
   const scrollRef = useRef<ScrollView>(null);
+  const [listening, setListening] = useState(false);
+  const voiceAvailable = speechRecognitionAvailable();
 
   const applyHistory = useCallback((history: { role: string; text: string }[] | undefined, turn: PreConsultTurn) => {
     const mapped: ChatMessage[] = (history ?? []).map((item) => ({
@@ -108,6 +113,10 @@ export default function PreConsultScreen() {
       }
     }
     setMessages(mapped);
+    if (readAloud && mapped.length > 0) {
+      const lastBot = [...mapped].reverse().find(m => m.role === 'bot');
+      if (lastBot) speak(lastBot.text);
+    }
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
   }, []);
 
@@ -174,6 +183,27 @@ export default function PreConsultScreen() {
     void sendAnswer(waitingKey || 'chief_complaint', text, text, text);
   }, [freeText, waitingKey, sendAnswer]);
 
+
+  const handleVoiceToggle = useCallback(async () => {
+    if (listening) {
+      stopListening();
+      setListening(false);
+      return;
+    }
+    const granted = await requestMicPermission();
+    if (!granted) {
+      return;
+    }
+    setListening(true);
+    startListening(
+      (text) => {
+        setListening(false);
+        setFreeText(text);
+      },
+      (partial) => setFreeText(partial),
+    );
+  }, [listening]);
+
   const urgency = typeof summary?.urgency === 'string' ? summary.urgency : '';
 
   return (
@@ -182,7 +212,10 @@ export default function PreConsultScreen() {
         {messages.map((msg, i) => (
           <BubbleIn key={`${msg.role}-${i}`} side={msg.role === 'user' ? 'user' : 'bot'}>
           <View style={msg.role === 'bot' ? [styles.botBubble, { backgroundColor: theme.surface, borderColor: theme.border }] : [styles.userBubble, { backgroundColor: theme.primary }]}>
-            <Text style={msg.role === 'bot' ? [styles.botText, { color: theme.ink }] : [styles.userText, { color: theme.onPrimary }]}>{msg.text}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, flex: 1 }}>
+            <Text style={[msg.role === 'bot' ? styles.botText : styles.userText, msg.role === 'bot' ? { color: theme.ink, flex: 1 } : { color: theme.onPrimary }]}>{msg.text}</Text>
+            {msg.role === 'bot' ? <SpeakButton text={msg.text} /> : null}
+          </View>
             {msg.options && msg.options.length > 0 && !done && i === messages.length - 1 && (
               <View style={styles.optionsRow}>
                 {msg.options.map((opt) => (
@@ -206,7 +239,10 @@ export default function PreConsultScreen() {
         {done && summary && (
           <FadeSlide>
           <Card style={styles.summaryCard}>
-            <Text style={[styles.summaryTitle, { color: theme.ink }]}>Pre-consultation summary</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={[styles.summaryTitle, { color: theme.ink }]}>Pre-consultation summary</Text>
+              <SpeakButton text={typeof summary.clinical_summary === 'string' ? summary.clinical_summary : 'Pre-consultation summary ready'} />
+            </View>
             {urgency ? <StatusBadge label={urgency} tone={urgency === 'red' ? 'danger' : urgency === 'green' ? 'success' : 'warning'} /> : null}
             {typeof summary.clinical_summary === 'string' && summary.clinical_summary ? (
               <Text style={[styles.summaryBody, { color: theme.inkMuted }]}>{summary.clinical_summary}</Text>
@@ -221,11 +257,21 @@ export default function PreConsultScreen() {
 
       {waitingForFreeText && !done && (
         <View style={[styles.inputArea, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>
+          {voiceAvailable ? (
+              <Pressable
+                onPress={() => void handleVoiceToggle()}
+                style={({ pressed }) => [{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: listening ? theme.dangerSoft : theme.primarySoft }, pressed && { opacity: 0.78 }]}
+                accessibilityRole="button"
+                accessibilityLabel={listening ? 'Stop listening' : 'Speak your answer'}
+              >
+                <Ionicons name={listening ? 'mic' : 'mic-outline'} size={18} color={listening ? theme.danger : theme.primaryDark} />
+              </Pressable>
+            ) : null}
           <TextInput
             style={[styles.textInput, { color: theme.ink, backgroundColor: theme.surface, borderColor: theme.borderStrong }]}
             value={freeText}
             onChangeText={setFreeText}
-            placeholder="Type your answer..."
+            placeholder={listening ? 'Listening...' : 'Type your answer...'}
             placeholderTextColor={theme.inkSubtle}
             multiline
           />
