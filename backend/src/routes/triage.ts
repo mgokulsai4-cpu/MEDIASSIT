@@ -1,9 +1,10 @@
 import express from 'express';
 import { runTriage } from '../engine.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.post('/triage', (req, res) => {
+router.post('/triage', requireAuth, (req, res) => {
   try {
     const result = runTriage(req.body);
 

@@ -14,7 +14,11 @@ export async function handleGetProfile(req: Request, res: Response) {
 }
 
 export async function handleGetProfileById(req: Request, res: Response) {
-  res.json({ success: true, data: { patient: await getPatientByPatientId(String(req.params.id)) } });
+  const patient = await getPatientByPatientId(String(req.params.id));
+  if (req.user!.role === 'patient' && patient.user_id !== req.user!.user_id) {
+    throw Errors.forbidden('Cannot access other patients profiles');
+  }
+  res.json({ success: true, data: { patient } });
 }
 
 export async function handleUpdateProfile(req: Request, res: Response) {
