@@ -1,5 +1,5 @@
 import express from 'express';
-import { runTriage } from '../engine';
+import { runTriage } from '../engine.js';
 
 const router = express.Router();
 
