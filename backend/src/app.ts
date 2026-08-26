@@ -1,69 +1,62 @@
-import express, { Express } from 'express';
+import express from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import { env } from './config/env.js';
-import { errorHandler, notFoundHandler } from './middleware/error.js';
-import { authRouter } from './routes/auth.js';
-import { aiRouter } from './routes/ai.js';
-import { doctorRouter } from './routes/doctors.js';
-import { appointmentRouter } from './routes/appointments.js';
-import { queueRouter } from './routes/queue.js';
-import { reportRouter } from './routes/reports.js';
-import { patientRouter } from './routes/patients.js';
-import { preconsultRouter } from './routes/preconsult.js';
-import { doctorDashboardRouter } from './routes/doctorDashboard.js';
-import { slotRouter } from './routes/slotRecommendation.js';
-import { notificationRouter } from './routes/notifications.js';
-import { prescriptionRouter } from './routes/prescriptions.js';
-import { familyRouter } from './routes/family.js';
-import { timelineRouter } from './routes/timeline.js';
-import { scanRouter } from './routes/scan.js';
+import { runTriage } from './engine';
 
-export function createApp(): Express {
+export function createApp() {
   const app = express();
 
-  app.set('trust proxy', 1);
-  app.use(helmet());
-  app.use(
-    cors({
-      origin: env.corsOrigins.includes('*') ? true : env.corsOrigins,
-      credentials: true,
-    }),
-  );
-  app.use(express.json({ limit: '12mb' }));
+  app.use(cors());
+  app.use(express.json());
 
-  const limiter = rateLimit({
-    windowMs: env.rateLimitWindowMs,
-    max: env.isTest ? 10000 : env.rateLimitMax,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { success: false, message: 'Too many requests, please try again later' },
-  });
-  app.use('/api', limiter);
-
+  // Health route
   app.get('/', (_req, res) => {
-    res.json({ name: 'MedAssist+ API', version: '1.0.0', docs: '/api/health' });
+    res.json({
+      name: 'MedAssist+ API',
+      version: '1.0.0'
+    });
   });
 
-  app.use('/api/auth', authRouter);
-  app.use('/api/ai', aiRouter);
-  app.use('/api/doctors', doctorRouter);
-  app.use('/api/appointments', appointmentRouter);
-  app.use('/api/queue', queueRouter);
-  app.use('/api/reports', reportRouter);
-  app.use('/api/patients', patientRouter);
-  app.use('/api/preconsult', preconsultRouter);
-  app.use('/api/doctor-dashboard', doctorDashboardRouter);
-  app.use('/api/slots', slotRouter);
-  app.use('/api/notifications', notificationRouter);
-  app.use('/api/prescriptions', prescriptionRouter);
-  app.use('/api/family', familyRouter);
-  app.use('/api/timeline', timelineRouter);
-  app.use('/api/scan', scanRouter);
+  // 🔥 TRIAGE ROUTE (FIXED)
+  app.post('/api/triage', (req, res) => {
+    try {
+      const { messages, answers } = req.body;
 
-  app.use(notFoundHandler);
-  app.use(errorHandler);
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({
+          success: false,
+          message: 'messages array required'
+        });
+      }
+
+      // ✅ FIXED CALL
+      const result = runTriage({
+        messages,
+        answers: answers || []
+      });
+
+      return res.json({
+        success: true,
+        data: result
+      });
+
+    } catch (err) {
+      console.error('Triage error:', err);
+
+      return res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+      });
+    }
+  });
+
+  // 404 handler
+  app.use((req, res) => {
+    res.status(404).json({
+      success: false,
+      message: `Route not found: ${req.method} ${req.originalUrl}`,
+      code: 'NOT_FOUND'
+    });
+  });
 
   return app;
 }

@@ -7,33 +7,52 @@ import { autoSeed } from './seed/autoSeed.js';
 import { initRealtime } from './services/realtimeService.js';
 
 async function main() {
-  const dbInfo = await connectDatabase();
-  // Auto-seed when using in-memory MongoDB so doctors & demo accounts exist
-  if (dbInfo.instanceName === 'in-memory-mongodb') {
-    await autoSeed();
-  }
-  const app = createApp();
-  const server = app.listen(env.port, () => {
-    logger.info('MedAssist+ API listening on port ' + env.port + ' (' + env.nodeEnv + ')');
-  });
-  initRealtime(server);
-  startScheduler(30);
+  try {
+    // Connect DB
+    const dbInfo = await connectDatabase();
 
-  const shutdown = async (signal: string) => {
-    logger.info('Received ' + signal + ' - shutting down gracefully');
-    stopScheduler();
-    server.close(async () => {
-      await disconnectDatabase();
-      process.exit(0);
+    // Auto-seed for in-memory DB
+    if (dbInfo.instanceName === 'in-memory-mongodb') {
+      await autoSeed();
+    }
+
+    // Create Express app
+    const app = createApp();
+
+    // Start server
+    const server = app.listen(env.port, () => {
+      logger.info(
+        `MedAssist+ API listening on port ${env.port} (${env.nodeEnv})`
+      );
     });
-    setTimeout(() => process.exit(1), 8000).unref();
-  };
 
-  process.on('SIGINT', () => void shutdown('SIGINT'));
-  process.on('SIGTERM', () => void shutdown('SIGTERM'));
+    // Init realtime (socket)
+    initRealtime(server);
+
+    // Start scheduler
+    startScheduler(30);
+
+    // Graceful shutdown
+    const shutdown = async (signal: string) => {
+      logger.info(`Received ${signal} - shutting down gracefully`);
+
+      stopScheduler();
+
+      server.close(async () => {
+        await disconnectDatabase();
+        process.exit(0);
+      });
+
+      setTimeout(() => process.exit(1), 8000).unref();
+    };
+
+    process.on('SIGINT', () => void shutdown('SIGINT'));
+    process.on('SIGTERM', () => void shutdown('SIGTERM'));
+
+  } catch (err) {
+    logger.error('Fatal startup error', err);
+    process.exit(1);
+  }
 }
 
-main().catch((err) => {
-  logger.error('Fatal startup error', err);
-  process.exit(1);
-});
+main();
